@@ -227,7 +227,8 @@ const MyNFTData = ({ caver, newKip17addr }) => {
 
           JsonDescription = jsonFile.description;
           const Image = jsonFile.image;
-          JsonURL = Image.replace("ipfs://", "https://gateway.ipfs.io/ipfs/");
+          //JsonURL = Image.replace("ipfs://", "https://gateway.ipfs.io/ipfs/");
+          JsonURL = Image.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/");
           console.log("JsonURL : " + JsonURL);
 
           //FireBaseNFTData(name, symbol, tokenId, JsonURL, JsonName, JsonDescription);
