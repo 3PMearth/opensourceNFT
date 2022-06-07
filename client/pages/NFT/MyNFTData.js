@@ -5,8 +5,10 @@ import Mystyles from "../../styles/mynft.module.css";
 import FireBaseInit from '../../components/FireBaseInit';
 import Caver from "caver-js";
 
-const MyNFTData = ({ caver, newKip17addr }) => {
+const MyNFTData = ({ web3, caver, newKip17addr }) => {
   const [nftlist, setNftlist] = useState([]);
+  
+  const [Contractlist, setContractlist] = useState([]);
   const [GameNFTlist, setGameNFTlist] = useState([]);
   const [Showlist, setShowlist] = useState([]);
   const [isGameNFT, setGameNFT] = useState(false);
@@ -20,30 +22,8 @@ const MyNFTData = ({ caver, newKip17addr }) => {
 
   useEffect(() => {
     SaveMyToken();
-    KasMigrate();
-    /*
-    TokenHistoryQueryOptions options = new TokenHistoryQueryOptions();
-    options.setStatus("completed");
-    options.setSize((long)1);
-    options.setType("KIP-7");
-
-    PageableFtContractDetails details = caver.kas.tokenHistory.getFTContractList(options);
-    System.out.println(details);
-    */
-
-
 
   }, []);
-
-  /*
-  void getContractList() {
-    try {
-        Kip17ContractListResponse response = caver.kas.kip17.getContractList();
-    } catch(ApiException e) {
-        //handle error
-    }
-  }
-  */
 
   const KasMigrate = async () => {
     // 키 마이그레이션
@@ -59,105 +39,40 @@ const MyNFTData = ({ caver, newKip17addr }) => {
 
 
     const account = window.sessionStorage.getItem('ID');
-    const privateKey = "0x75d0ed32d4d58d5e3299b56d38bacc782c052a831bd8c15f6e0702ad5fe52723";
-
-    const rpc = await caver.rpc.klay.getAccount(account);
-    //const rpc = await caver.rpc.klay.sign(account, "hello");
-    //const rpc = await caver.rpc.klay.getTransactionCount(account);
-    const result = await Caver.kas.tokenHistory.getNFTContract('0x85106722f1895bdE84398076902975F914ef6717');
-
-    console.log("RPC: " + JSON.stringify(rpc));
     console.log("result: " + JSON.stringify(result));
 
+    //완성본
     const query = {
-      status: Caver.kas.tokenHistory.queryOptions.status.COMPLETED,
-      size: 100,
-      type: Caver.kas.tokenHistory.queryOptions.type.KIP17,
-    };
+      kind: [Caver.kas.tokenHistory.queryOptions.kind.NFT],
+      size: 5,
+      //range: '1593529200,1599145200',
+      //caFilter: '0xbbe63781168c9e67e7a8b112425aa84c479f39aa',
+    }
+    const result = await Caver.kas.tokenHistory.getTransferHistoryByAccount(account, query);
+    //console.log("Send: " + JSON.stringify(result));
 
-    result = await Caver.kas.tokenHistory.getNFTContractList(query);
-    console.log("result22: " + JSON.stringify(result));
-
+    let index = 0;
+    const jsondata = result['items'][index]['to'];
+    console.log("JSON : " + JSON.stringify(jsondata));
     
+    let arr = [];
+    for (let i = 0; i <= query.size; i++) {
+      console.log("i : " + i + "    JSON : " + JSON.stringify(result['items']['0']['to']) + "   Address : " + account);
 
+      const number = i;
+      const jsondata = result['items'][number];
 
+       if(jsondata != 'undefined' && jsondata != null)
+       {
+          const jsonTo =  jsondata['to'];
 
-    // Klaytn 계정을 KAS Wallet API로 마이그레이션하기 위해서는 트랜잭션을 생성하고 이를 서명하여 KAS로 전송해야 합니다.
-    // 트랜잭션에 서명하기 위해 Klaytn 계정으로 Keyring 인스턴스를 생성하고 이를 KeyringContainer에 추가합니다.
-    // 만약 Klaytn 계정의 키가 `AccountKeyWeigthedMultiSig`이거나 `AccountKeyRoleBased`인 경우
-    // `keyringContainer.keyring.create` 의 두 번째 파라미터를 배열 혹은 이중 배열로 넘기면 됩니다.
-    // 더욱 자세한 내용은 https://docs.klaytn.com/dapp/sdk/caver-js/api-references/caver.wallet/keyring#caver-wallet-keyring-create 를 참고해 주세요.
-    /*
-    const keyringContainer =  new Caver.keyringContainer();
-    const keyring = keyringContainer.keyring.create(account,privateKey);
-    keyringContainer.add(keyring);
-
-    const createdKeys = await Caver.kas.wallet.createKeys(1);
-    const key = createdKeys.items[0];
-
-    // FeeDelegatedAccountUpdate 트랜잭션을 생성합니다.
-    // account 필드에 할당되는 값은 `caver.account.createWithAccountKeyPublic`를 사용하여 생성할 수 있으며
-    // 마이그레이션 하고자 하는 계정의 주소, 그리고 KAS Wallet API에 생성된 키(public key string 형태)를 파라미터로 전달해야 합니다.
-    const updateTx = new Caver.transaction.feeDelegatedAccountUpdate({
-        from: keyring.address,
-        account: Caver.account.createWithAccountKeyPublic(keyring.address, key.publicKey),
-        gas: 1000000,
-    });
-
-    // 트랜잭션에 서명합니다.
-   
-    await keyringContainer.sign(keyring.address, updateTx);
-
-    const result = {
-        keyId: key.keyId,
-        address: keyring.address,
-        rlp: updateTx.getRLPEncoding(),
-    };
-
-    console.log("Result : " + result);
-    */
-
-    /*
-    
-    const caverExt = new CaverExtKAS();
-
-    const account = 'KASKY2SYRNZ8X68SL3QKRT4C';
-    const privateKey = '8AMfKLWAzy8pSALU5Emo_iijrX7K6dqOPezqOH7x';
-    const chainId = '1001';
-    caverExt.initKASAPI(chainId, account, privateKey);
-    console.log("Init KIP17 API");
-
-    const contracts = await caverExt.kas.kip17.getContractList();
-    console.log("GetContractList : " + JSON.stringify(contracts));
-
-    const query = {
-      status: caverExt.kas.tokenHistory.queryOptions.status.COMPLETED,
-      size: 100,
-      type: caverExt.kas.tokenHistory.queryOptions.type.KIP17,
-  }
-    const result = await caverExt.kas.tokenHistory.getNFTContractList(query); 
-    console.log("getNFTContractList : " + JSON.stringify(result));
-    */
-
-    /* 
-    // Create a KeyringContainer instance
-    const keyringContainer = new caverExt.keyringContainer();
-
-    // Create a keyring from private key
-
-    const keyring = keyringContainer.keyring.createFromPrivateKey(privateKey);
-
-    // Add a keyring to the keyringContainer
-    keyringContainer.add(keyring);
-    */
-
-
-    //const address = keyring.address;
-    //const key = keyring.key.privateKey;
-    //const nonce = 0;
-
-    //const ret = await caver.kas.wallet.migrateAccounts([{ address, key, nonce }]);
-    //console.log(ret); 
+          if(jsonTo == account)
+          {
+            const jsonContract =  jsondata['contract']['address'];
+            setContractlist((prevContract) => {
+              return [...prevContract, { jsonContract }];
+            });
+          }
   }
 
   const SettingGameNFT = (isOK) => {
@@ -174,91 +89,134 @@ const MyNFTData = ({ caver, newKip17addr }) => {
     const tokenContract = "";
     const account = window.sessionStorage.getItem('ID');
 
-    console.log("NFT : " + newKip17addr);
     console.log("account : " + account);
 
-    tokenContract = await new caver.klay.Contract(kip17Abi, newKip17addr);
+    const CaverExtKAS = require('caver-js-ext-kas');
+    const Caver = new CaverExtKAS();    
 
-    const name = await tokenContract.methods.name().call();
-    const symbol = await tokenContract.methods.symbol().call();
-    const totalSupply = await tokenContract.methods.totalSupply().call();
+    //해당 부분은 환경변수로 받아올수 있도록 수정
+    const KasAccount = 'KASKY2SYRNZ8X68SL3QKRT4C';
+    const KasKey = '8AMfKLWAzy8pSALU5Emo_iijrX7K6dqOPezqOH7x';
+    const chainId = '1001';
+    Caver.initKASAPI(chainId, KasAccount, KasKey);
 
-    const option = tokenContract.options;
-
-    const JsonURL = '';
-    const JsonName = '';
-    const JsonDescription = '';
-    const FireBaseDB = false;
-
-    let arr = [];
-    for (let i = 1; i <= totalSupply; i++) {
-      arr.push(i);
+    const query = {
+      kind: [Caver.kas.tokenHistory.queryOptions.kind.NFT],
+      size: 1000,
+      //range: '1593529200,1599145200',
+      //caFilter: '0xbbe63781168c9e67e7a8b112425aa84c479f39aa',
     }
+    const result = await Caver.kas.tokenHistory.getTransferHistoryByAccount(account, query);
+    //console.log("Send: " + JSON.stringify(result));
 
-    for (let tokenId of arr) {
-      let tokenOwner = await tokenContract.methods.ownerOf(tokenId).call();
-      //let blocknumber = await caver.rpc.klay.getBlockByNumber(tokenId);
-      //let blockhash = await caver.rpc.klay.getFilterLogs(account);
-      //console.log("blockhash : " + JSON.stringify(blockhash));
+    let index = 0;
+    const jsondata = result['items'][index]['to'];
+    console.log("JSON : " + JSON.stringify(jsondata));
+    
+    let Contract = [];
+    for (let i = 0; i <= query.size; i++) 
+    {
+      const number = i;
+      const jsondata = result['items'][number];
 
-      //transaction.getTransactionHash()
-      //transaction.getSenderTxHash()
+      //로그상에서 컨트랙트 ID 가지고 오기
+       if(jsondata != 'undefined' && jsondata != null)
+       {
+          const jsonTo =  jsondata['to'];
 
-      if (String(tokenOwner).toLowerCase() === account) {
-        let tokenURI = await tokenContract.methods.tokenURI(tokenId).call();
-        FireBaseDB = false;
-        console.log("tokenURI : " + tokenURI);
+          if(jsonTo == account)
+          {
+            const jsonContract =  jsondata['contract']['address'];
+            Contract.push(jsonContract);
+          }
+       }
+       else
+       {
+         break;
+       }
+    }    
 
-        //Nft nft = caver.kas.tokenHistory.getNFT(contractAddress, tokenId);
-        //System.out.println(nft);
+    let uniqueArr = [];
+    Contract.forEach((element) => {
+    if (!uniqueArr.includes(element)) {
+        uniqueArr.push(element);
+    }
+    });
+    
 
-        const URL = tokenURI.substring(0, 7);
-        if (URL == "ipfs://") {
-          const MetaDataJson = tokenURI.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/");
+    for (let con of uniqueArr) 
+    {
+      tokenContract = await new caver.klay.Contract(kip17Abi, con);
 
-          //const config = { headers : { 'Accept' : 'application/json'}};
-          //const GetJson = await fetch(MetaDataJson,config);
-          const GetJson = await fetch(MetaDataJson);
-
-          const jsonFile = await GetJson.json();
-          console.log("jsonFile : " + JSON.stringify(jsonFile));
-
-          JsonName = jsonFile.name;
-
-          JsonDescription = jsonFile.description;
-          const Image = jsonFile.image;
-          //JsonURL = Image.replace("ipfs://", "https://gateway.ipfs.io/ipfs/");
-          JsonURL = Image.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/");
-          console.log("JsonURL : " + JsonURL);
-
-          //FireBaseNFTData(name, symbol, tokenId, JsonURL, JsonName, JsonDescription);
-          const NFTItem = FireBaseInit.collection("NFT_ITEM");
-
-          NFTItem.doc(JsonName).get().then((doc) => {
-            if (doc.exists) {
-              console.log("파이어베이스 이제 들어옴");
-
-              FireBaseDB = true;
-              setGameNFTlist((prevState) => {
-                return [...prevState, { name, symbol, tokenId, JsonURL, JsonName, JsonDescription, FireBaseDB }];
-              });
-            }
+      const name = await tokenContract.methods.name().call();
+      const symbol = await tokenContract.methods.symbol().call();
+      const totalSupply = await tokenContract.methods.totalSupply().call();
+  
+      const option = tokenContract.options;
+  
+      const JsonURL = '';
+      const JsonName = '';
+      const JsonDescription = '';
+      const FireBaseDB = false;
+  
+      let arr = [];
+      for (let i = 1; i <= totalSupply; i++) {
+        arr.push(i);
+      }
+  
+      for (let tokenId of arr) {
+        let tokenOwner = await tokenContract.methods.ownerOf(tokenId).call();
+  
+        if (String(tokenOwner).toLowerCase() === account) {
+          let tokenURI = await tokenContract.methods.tokenURI(tokenId).call();
+          FireBaseDB = false;
+          console.log("tokenURI : " + tokenURI);
+  
+          const URL = tokenURI.substring(0, 7);
+          if (URL == "ipfs://") {
+            const MetaDataJson = tokenURI.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/");
+  
+            const GetJson = await fetch(MetaDataJson);
+  
+            const jsonFile = await GetJson.json();
+            console.log("jsonFile : " + JSON.stringify(jsonFile));
+  
+            JsonName = jsonFile.name;
+  
+            JsonDescription = jsonFile.description;
+            const Image = jsonFile.image;
+            //JsonURL = Image.replace("ipfs://", "https://gateway.ipfs.io/ipfs/");
+            JsonURL = Image.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/");
+            console.log("JsonURL : " + JsonURL);
+  
+            //FireBaseNFTData(name, symbol, tokenId, JsonURL, JsonName, JsonDescription);
+            const NFTItem = FireBaseInit.collection("NFT_ITEM");
+  
+            NFTItem.doc(JsonName).get().then((doc) => {
+              if (doc.exists) {
+                console.log("파이어베이스 이제 들어옴");
+  
+                FireBaseDB = true;
+                setGameNFTlist((prevState) => {
+                  return [...prevState, { name, symbol, tokenId, JsonURL, JsonName, JsonDescription, FireBaseDB }];
+                });
+              }
+            });
+          }
+          else {
+            JsonName = tokenURI;
+          }
+  
+          setNftlist((prevState) => {
+            return [...prevState, { name, symbol, tokenId, JsonURL, JsonName, JsonDescription, FireBaseDB }];
+          });
+  
+          setShowlist((prevState) => {
+            return [...prevState, { name, symbol, tokenId, JsonURL, JsonName, JsonDescription, FireBaseDB }];
           });
         }
-        else {
-          JsonName = tokenURI;
-        }
-
-        setNftlist((prevState) => {
-          return [...prevState, { name, symbol, tokenId, JsonURL, JsonName, JsonDescription, FireBaseDB }];
-        });
-
-        setShowlist((prevState) => {
-          return [...prevState, { name, symbol, tokenId, JsonURL, JsonName, JsonDescription, FireBaseDB }];
-        });
-      }
+      }      
     }
-
   };
 
 
@@ -274,19 +232,31 @@ const MyNFTData = ({ caver, newKip17addr }) => {
           <form className={Mystyles.todoNFTShowtemplate} key={token.id}>
             <div className="card mb-3">
               <h3 className="card-header">{token.FireBaseDB ? token.name + " GameNFT" : token.name}</h3>
-              <div className="card-body">
+              <div className="card-body" style={{ display: "block", margin: "auto", height: "250px" ,width: "250px"  }}>
                 <img
+                  //style={{ width: "100%", height: "80%", objectFit: "cover", borderTopLeftRadius: "inherit", borderTopRightRadius: "inherit", margin: "0.1px" }}
+                  style={{ width: "100%", height: "100%", objectFit: "contain", }}
                   src={token.JsonURL}
                   alt={token.id}
-                  style={{ width: "100%", height: "80%", objectFit: "cover", borderTopLeftRadius: "inherit", borderTopRightRadius: "inherit", margin: "0.1px" }}
                 />
               </div>
-
               <ul className="list-group list-group-flush">
-                <li className="list-group-item">이름 : {token.JsonName} </li>
-                <li className="list-group-item">ID : {token.tokenId} </li>
-                <li className="list-group-item">심볼 : {token.symbol}</li>
-                <li className="list-group-item">설명 : {token.JsonDescription}</li>
+              <table>
+              <li className="list-group-item"><tr><th scope="row" width="50px" text-align="center">이름</th>
+                                                  <td>{token.JsonName}</td></tr></li>
+              <li className="list-group-item"><tr><th scope="row" width="50px" text-align="center">ID</th>
+                                                  <td>{token.tokenId}</td></tr></li>
+              <li className="list-group-item"><tr><th scope="row" width="50px" text-align="center">심볼</th>
+                                                  <td>{token.symbol}</td></tr></li>
+              <li className="list-group-item"><tr><th scope="row" width="50px" text-align="center">설명</th>
+                                                  <td height="80px">{token.JsonDescription}</td></tr></li>
+              </table>
+                  
+                {/*
+                <div><li className="list-group-item">ID : {token.tokenId} </li></div>
+                <div><li className="list-group-item">심볼 : {token.symbol}</li></div>
+                <div><li className="list-group-item">설명 : 안녕하세요 설명이 길어집니다{token.JsonDescription}</li></div>
+                 */}
               </ul>
             </div>
           </form>

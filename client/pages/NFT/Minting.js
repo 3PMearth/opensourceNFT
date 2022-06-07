@@ -18,7 +18,7 @@ import kip17Abi from "../../components/kip17Abi";
 const PinataApiKey = "4f31d7dbb5810f6e37be";
 const PinataSecretApiKey = "aa75590ac1823ed49f38e6c4b8be577d9dc5624640997f11a2a01223a7b0c608";
 
-export default function CreateNFT({ caver, newKip17addr }) {
+export default function CreateNFT({ web3, caver, newKip17addr }) {
   const [fileUrl, updateFileUrl] = useState('');
   const [isMint, setIsMint] = useState(false);
   const [Inputimage, setInputImage] = useState(null);
