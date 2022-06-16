@@ -9,43 +9,65 @@ import LoginModal from './api/LoginModal';
 //import * as AlertText from "./api/AlertText.js";
 import AlertModal from "./api/AlertModal";
 
-const MainTitle = () => {
+const MainTitle = ({Address, SetAddress,ShowAddress,SetShowAddress, setWalletType,isLogin,setIsLogin, web3, caver, onClickKaikas, onMetaMask }) => {
     const Name = "3PM";
     const [LoginOn, setLoginOn] = useState(false);
     const [AlertOn, setAlertOn] = useState(false);
-    const [Address, SetAddress] = useState('Login');
 
+    
+
+    /*
     const CheckUnlocked = async () => 
     {
-        if (typeof window !== 'undefined' && window.klaytn) 
-        {
-            const isID = window.sessionStorage.getItem('ID');
-            // 지갑이 연결되어있다면 true, 아니라면 false를 리턴합니다.
-            const isUnlock = await window.klaytn._kaikas.isUnlocked();
-    
-            if (isID !== null && isUnlock === true) 
-            {
-                const firstText = isID.substring(0,8);
-                const LastText = isID.slice(-6);
-                const AllId = firstText + "......." + LastText;
+        
+        const isUnlock = true;
+        const isID = "";
 
-                SetAddress(AllId);
-            }
-            else
-            {
-                SetAddress('Login');
-            }
+        if (typeof window !== 'undefined' && window.klaytn)
+        {
+            isID = window.sessionStorage.getItem('ID');
+            // 지갑이 연결되어있다면 true, 아니라면 false를 리턴합니다.
+            isUnlock = await window.klaytn._kaikas.isUnlocked();  
+            console.log("klaytn isID : " + isID);
+            console.log("klaytn isUnlock : " + isUnlock);
         }
 
-    }
+        if (isID !== null && isUnlock === true) 
+        {
+            const firstText = isID.substring(0,8);
+            const LastText = isID.slice(-6);
+            const AllId = firstText + "......." + LastText;
 
+            SetAddress(AllId);
+        } 
+        
+    }
     CheckUnlocked();
+    */   
+
+    const CheckUnlocked = () => 
+    {
+        if(window.klaytn || window.ethereum)
+            setLoginOn(true);
+        else
+            setAlertOn(true); 
+    }
 
     return (
             <>
             <LoginModal
                 show={LoginOn}
                 onHide={() => setLoginOn(false)}
+                onClickKaikas={onClickKaikas}
+                onMetaMask={onMetaMask}
+                web3={web3}
+                caver={caver}
+                isLogin={isLogin}
+                setIsLogin={setIsLogin}
+                setWalletType={setWalletType}
+                Address={Address}
+                SetAddress={SetAddress}
+                SetShowAddress={SetShowAddress}
             />           
             <AlertModal
                 show={AlertOn}
@@ -65,14 +87,14 @@ const MainTitle = () => {
                         </Nav>
                     </Navbar.Collapse>
                     <Nav className="mr-auto">
-                        <Button variant="primary" onClick={()=> { window.klaytn ? setLoginOn (true) : setAlertOn(true); }} >{Address}</Button>
+                        <Button variant="primary" onClick={()=> { CheckUnlocked(); }} >{ShowAddress}</Button>
                     </Nav>
                 </Navbar>
             </div>
 
 
         </>
-    )
+    );
 }
 
 export default MainTitle;

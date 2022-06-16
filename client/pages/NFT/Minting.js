@@ -18,7 +18,7 @@ import kip17Abi from "../../components/kip17Abi";
 const PinataApiKey = "4f31d7dbb5810f6e37be";
 const PinataSecretApiKey = "aa75590ac1823ed49f38e6c4b8be577d9dc5624640997f11a2a01223a7b0c608";
 
-export default function CreateNFT({ web3, caver, newKip17addr }) {
+export default function CreateNFT({Address, walletType,isLogin, web3, caver, newKip17addr }) {
   const [fileUrl, updateFileUrl] = useState('');
   const [isMint, setIsMint] = useState(false);
   const [Inputimage, setInputImage] = useState(null);
@@ -115,21 +115,20 @@ export default function CreateNFT({ web3, caver, newKip17addr }) {
   };
 
   const createNewNFT = async () => {
+
     console.log("NFTUrl :  " + NFTUrl);
 
     let tokenContract;
     let newTokenId;
 
-    const account = window.sessionStorage.getItem('ID');
-
     tokenContract = await new caver.klay.Contract(kip17Abi, newKip17addr, {
-      from: account,
+      from: Address,
     });
 
     tokenContract.options.address = newKip17addr;
-    newTokenId = await tokenContract.methods.mintNFT(account, NFTUrl).send(
+    newTokenId = await tokenContract.methods.mintNFT(Address, NFTUrl).send(
       {
-        from: account,
+        from: Address,
         gas: '850000'
       });
 
@@ -143,7 +142,6 @@ export default function CreateNFT({ web3, caver, newKip17addr }) {
   };
 
   const MakeJsonFile = async () => {
-
     const form = new FormData();
     form.append("file", FileName);
     const url = `https://api.pinata.cloud/pinning/pinFileToIPFS`;
@@ -164,6 +162,7 @@ export default function CreateNFT({ web3, caver, newKip17addr }) {
     console.log("respone : " + response.data.IpfsHash);
     setInputImage(response.data.IpfsHash);
     console.log("Inputimage : " + Inputimage);
+    console.log("newKip17addr : " + newKip17addr );
 
     MetaDataJson.image = "ipfs://" + response.data.IpfsHash;
 
@@ -178,18 +177,19 @@ export default function CreateNFT({ web3, caver, newKip17addr }) {
       let tokenContract;
       let newTokenId;
   
-      const account = window.sessionStorage.getItem('ID');
-  
       tokenContract = new caver.klay.Contract(kip17Abi, newKip17addr, {
-        from: account,
+        from: Address,
       });
   
       tokenContract.options.address = newKip17addr;
-      newTokenId = tokenContract.methods.mintNFT(account, "ipfs://" + result.IpfsHash).send(
+      
+      /*
+      newTokenId = tokenContract.methods.mintNFT(Address, "ipfs://" + result.IpfsHash).send(
         {
-          from: account,
+          from: Address,
           gas: '850000'
         });
+        */
 
     }).catch((err) => {
       //handle error here
@@ -200,7 +200,6 @@ export default function CreateNFT({ web3, caver, newKip17addr }) {
 
   return (
     <div>
-      <MainTitle />
       <form className={Mystyles.todolisttemplate}>
         <fieldset>
           <legend>NFT 제 작</legend>
