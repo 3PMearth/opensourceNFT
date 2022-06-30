@@ -23,8 +23,8 @@ const MyNFTData = ({ Address, walletType, web3, caver, newKip17addr }) => {
   });
 
   useEffect(() => {
-    SaveMyToken();
-    //KasMigrate();
+    //SaveMyToken();
+    KasMigrate();
 
   }, []);
 
@@ -34,7 +34,15 @@ const MyNFTData = ({ Address, walletType, web3, caver, newKip17addr }) => {
     //https://polygon-rpc.com                    //폴리곤 노드
     //https://eth-mainnet.public.blastapi.io     // 이더리움 노드
     //https://rpc.ankr.com/eth                   // 이더리움 노드 
-    axios.get('https://api.polygonscan.com/api?module=contract&action=getabi&address=0x51ef526a26854aaba5e3123e401b0223d262dd1e&apikey=9IGGE1IKHYZKFV33QCXC68XY7QV665JUIS')
+    const url = "https://deep-index.moralis.io/api/v2/" + Address + "/nft?chain=polygon&format=decimal";
+    axios.get(url,
+    {
+      headers: {
+        "X-API-KEY": 'uDk5KWWhcDUrUxY5JfKsDp5vVu6ddDRzwS6skkDUgiYHHlQmxBX2MBbn0iKKK67J',
+        "Content-Type": "application/json",
+        "accept": "application/json"
+      }
+    })
     .then(function (response) {
       // 성공한 경우 실행
       console.log("response : " + JSON.stringify(response));
@@ -44,16 +52,17 @@ const MyNFTData = ({ Address, walletType, web3, caver, newKip17addr }) => {
       console.log("error : " + error);
     })
 
+    /*
 
     const myAddr = '0x0ae80159dd77ea78688ecb2a18f96f2d373b1228';
 
     const { ethers } = require("ethers");
-    const NODE_URL = "https://polygon-rpc.com";    
+    const NODE_URL = "https://polygon-rpc.com";
     const provider = new ethers.providers.JsonRpcProvider(NODE_URL);
     //const contract = await ethers.getContractFactory("MyERC1155NFT");
     console.log("code : " +  JSON.stringify(contract));
 
-    const code = await provider.getCode(myAddr,"latest" );    
+    const code = await provider.getCode(myAddr,"latest" );
     console.log("code : " +  JSON.stringify(code));
 
     var currentBlock = await provider.getBlockNumber();
@@ -63,102 +72,6 @@ const MyNFTData = ({ Address, walletType, web3, caver, newKip17addr }) => {
     console.log("Count : " + txCount);
 
 
-    /*
-    web3.eth.getBlockNumber().then((result) => {
-      console.log("Latest Ethereum Block is ",result);
-    });
-    */
-
-
-    /*
-    const myWeb3 = require('web3');
-
-    const provider = "https://polygon-rpc.com";
-    const WebWeb = await new myWeb3(provider);
-    */
-
-    /*
-    web3.eth.getBlockNumber().then((result) => {
-      console.log("Latest Ethereum Block is ",result);
-    });
-    */
-    
-    /*
-    var myAddr = '0x0ae80159dd77ea78688ecb2a18f96f2d373b1228';
-    let block = await WebWeb.eth.getBlock('latest');
-    let number = block.number;
-    let transactions = block.transactions;
-
-    console.log('Search Block: ' + block);
-    console.log('number: ' + block.number);
-    
-
-    if (block != null && block.transactions != null) 
-    {
-        for (let txHash of block.transactions) 
-        {
-            const tx = await WebWeb.eth.getTransaction(txHash);
-            const hash =  tx.to.toLowerCase();
-            console.log(hash);
-            if (myAddr == hash) 
-            {
-                console.log("from: " + tx.from.toLowerCase() + " to: " + tx.to.toLowerCase() + " value: " + tx.value);
-            }
-        }
-    }
-    */
-
-
-
-
-    //const wallet = await web3.eth.getPendingTransactions();   //"eth_pendingTransactions "
-    //ID : 07a655bf6c8a41658b05db11b38bd992
-    //privateKey : dc4d764f90ad42bd89ba155a7f82e704
-    //https://mainnet.infura.io/v3/07a655bf6c8a41658b05db11b38bd992
-
-    //var myAddr = '0x0ae80159dd77ea78688ecb2a18f96f2d373b1228';
-    //const count = await web3.eth.getBlockNumber();
-    //console.log("Count : " + count );
-
-
-    /*
-    web3.eth.getPastLogs({fromBlock:'0x0',address:'0x9e3319636e2126e3c0bc9e3134AEC5e1508A46c7'})
-    .then(res => {
-          res.forEach(rec => {
-          console.log(rec.blockNumber, rec.transactionHash, rec.topics);
-    });
-    }).catch(err => console.log("getPastLogs failed", err));
-    */
-    /*
-    var myAddr = '0x0ae80159dd77ea78688ecb2a18f96f2d373b1228';
-    var currentBlock = await web3.eth.blockNumber;
-    console.log("currentBlock : " + currentBlock);
-
-    var n = await web3.eth.getTransactionCount(myAddr, currentBlock);
-    var bal = await web3.eth.getBalance(myAddr, currentBlock);
-    for (var i=currentBlock; i >= 0 && (n > 0 || bal > 0); --i) {
-        try {
-            var block = await web3.eth.getBlock(i, true);
-            if (block && block.transactions) {
-                block.transactions.forEach(function(e) {
-                    if (myAddr == e.from) {
-                        if (e.from != e.to)
-                            bal = bal.plus(e.value);
-                        console.log(i, e.from, e.to, e.value.toString(10));
-                        --n;
-                    }
-                    if (myAddr == e.to) {
-                        if (e.from != e.to)
-                            bal = bal.minus(e.value);
-                        console.log(i, e.from, e.to, e.value.toString(10));
-                    }
-                });
-            }
-        } catch (e) { console.error("Error in block " + i, e); }
-    }
-    */
-    
-
     const tokenContract = "";
     const erc1155Abi = require('../../components/erc1155Abi.json');
     tokenContract = await new web3.eth.Contract(erc1155Abi, "0x51ef526a26854aaba5e3123e401b0223d262dd1e");
@@ -166,6 +79,7 @@ const MyNFTData = ({ Address, walletType, web3, caver, newKip17addr }) => {
     const owner = await tokenContract.methods.owner().call();
     const name = await tokenContract.methods.name().call();
     const symbol = await tokenContract.methods.symbol().call();
+    */
 
     /*
     let arr = [];
