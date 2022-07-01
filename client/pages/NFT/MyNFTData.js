@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import MainTitle from "../MainTitle";
 import kip17Abi from "../../components/kip17Abi";
 import erc721Abi from "../../components/erc721Abi";
-//import erc1155Abi from "../../components/erc1155Abi";
+import erc1155Abi from "../../components/erc1155Abi";
 import Mystyles from "../../styles/mynft.module.css";
 import FireBaseInit from '../../components/FireBaseInit';
 import Caver from "caver-js";
@@ -23,17 +23,29 @@ const MyNFTData = ({ Address, walletType, web3, caver, newKip17addr }) => {
   });
 
   useEffect(() => {
-    //SaveMyToken();
-    KasMigrate();
+    //KlaytnNFT();
+    PolygonNFT();
 
   }, []);
 
-  const KasMigrate = async () => 
+  const PolygonNFT = async () => 
   {
     //https://polygon-mainnet.public.blastapi.io //폴리곤 노드
     //https://polygon-rpc.com                    //폴리곤 노드
     //https://eth-mainnet.public.blastapi.io     // 이더리움 노드
     //https://rpc.ankr.com/eth                   // 이더리움 노드 
+
+    //오픈씨 컨트랙트 주소를 통해서 내가 배포한 NFT가 있는지 체크
+    /*
+    const openseaContract = "0x2953399124f0cbb46d2cbacd8a89cf0599974963";
+    const tokenContract = await new web3.eth.Contract(erc1155Abi, openseaContract);
+
+    const name = await tokenContract.methods.name().call();
+    const symbol = await tokenContract.methods.symbol().call();
+
+    */
+
+    //moralis API 에 있는 transction 로그를 이용해 NFT를 가지고 오는 방식
     const url = "https://deep-index.moralis.io/api/v2/" + Address + "/nft?chain=polygon&format=decimal";
     axios.get(url,
     {
@@ -43,55 +55,55 @@ const MyNFTData = ({ Address, walletType, web3, caver, newKip17addr }) => {
         "accept": "application/json"
       }
     })
-    .then(function (response) {
+    .then(async function (response) {
       // 성공한 경우 실행
-      console.log("response : " + JSON.stringify(response));
-    })
-    .catch(function (error) {
-      // 에러인 경우 실행
-      console.log("error : " + error);
-    })
+      
+      const resultData = JSON.stringify(response['data']['result']);
 
-    /*
+      for (var i = 0; i < response.data.result.length; i++) 
+      {
+        var user = response.data.result[i];
+        //console.log(user);
 
-    const myAddr = '0x0ae80159dd77ea78688ecb2a18f96f2d373b1228';
+        const name = user.name;
+        const symbol = user.symbol;
+        const tokenId =  user.token_id;
+        const tokenURI = user.token_uri;
 
-    const { ethers } = require("ethers");
-    const NODE_URL = "https://polygon-rpc.com";
-    const provider = new ethers.providers.JsonRpcProvider(NODE_URL);
-    //const contract = await ethers.getContractFactory("MyERC1155NFT");
-    console.log("code : " +  JSON.stringify(contract));
+        const JsonName = "";
+        const JsonDescription = "";
+        const JsonURL = "";
+        const FireBaseDB = false;
 
-    const code = await provider.getCode(myAddr,"latest" );
-    console.log("code : " +  JSON.stringify(code));
+        const URL = user.token_uri.substring(0, 7);
+        if (URL == "ipfs://") 
+        {          
+          //FireBaseNFTData(name, symbol, tokenId, JsonURL, JsonName, JsonDescription);
+          const NFTItem = FireBaseInit.collection("NFT_ITEM");
+  
+          NFTItem.doc(JsonName).get().then((doc) => {
+            if (doc.exists) {
+              console.log("파이어베이스 이제 들어옴");
+  
+              FireBaseDB = true;
+              setGameNFTlist((prevState) => {
+                return [...prevState, { name, symbol, tokenId, JsonURL, JsonName, JsonDescription, FireBaseDB }];
+              });
+            }
+          });
+        }
+        else
+        {
+          console.log('URI : ' + tokenURI);
+          const GetJson = await fetch(tokenURI);
+          const jsonFile = await GetJson.json();
 
-    var currentBlock = await provider.getBlockNumber();
-    console.log("currentBlock : " + currentBlock);
+          JsonName = jsonFile.name;      
+          JsonDescription = jsonFile.description;
+          JsonURL = jsonFile.image; 
 
-    const txCount = await provider.getTransactionCount(myAddr, "latest" );
-    console.log("Count : " + txCount);
-
-
-    const tokenContract = "";
-    const erc1155Abi = require('../../components/erc1155Abi.json');
-    tokenContract = await new web3.eth.Contract(erc1155Abi, "0x51ef526a26854aaba5e3123e401b0223d262dd1e");
-
-    const owner = await tokenContract.methods.owner().call();
-    const name = await tokenContract.methods.name().call();
-    const symbol = await tokenContract.methods.symbol().call();
-    */
-
-    /*
-    let arr = [];
-    for (let i = 1; i <= totalSupply; i++) {
-      arr.push(i);
-    }
-
-    for (let tokenId of arr) {
-      let tokenOwner = await tokenContract.methods.ownerOf(tokenId).call();
-      if (String(tokenOwner).toLowerCase() === Address) {
-        let tokenURI = await tokenContract.methods.uri(tokenId).call();
-        console.log("TokenURI : " + tokenURI);
+          console.log("Name : "+ JsonName);
+        }
 
         setNftlist((prevState) => {
           return [...prevState, { name, symbol, tokenId, JsonURL, JsonName, JsonDescription, FireBaseDB }];
@@ -99,11 +111,13 @@ const MyNFTData = ({ Address, walletType, web3, caver, newKip17addr }) => {
   
         setShowlist((prevState) => {
           return [...prevState, { name, symbol, tokenId, JsonURL, JsonName, JsonDescription, FireBaseDB }];
-        });        
-
-      }
-    }
-    */
+        }); 
+      } 
+    })
+    .catch(function (error) {
+      // 에러인 경우 실행
+      console.log("error : " + error);
+    })
 
   }
 
@@ -117,7 +131,7 @@ const MyNFTData = ({ Address, walletType, web3, caver, newKip17addr }) => {
   }
 
 
-  const SaveMyToken = async () => {
+  const KlaytnNFT = async () => {
     const tokenContract = "";
 
     console.log("account : " + Address);
