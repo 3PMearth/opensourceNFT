@@ -3,6 +3,7 @@ import MainTitle from "../MainTitle";
 import kip17Abi from "../../components/kip17Abi";
 import erc721Abi from "../../components/erc721Abi";
 import erc1155Abi from "../../components/erc1155Abi";
+import openseaAbi from "../../components/openseaErc1155";
 import Mystyles from "../../styles/mynft.module.css";
 import FireBaseInit from '../../components/FireBaseInit';
 import Caver from "caver-js";
@@ -22,11 +23,27 @@ const MyNFTData = ({ Address, walletType, web3, caver, newKip17addr }) => {
     Token: -1
   });
 
-  useEffect(() => {
-    //KlaytnNFT();
-    PolygonNFT();
+  useEffect( async () => {
+    if(walletType == "klay")
+    {
+      KlaytnNFT();
+    }
+    else
+    {
+      const chainId = await web3.eth.getChainId();
+      if(chainId == 137)  // polygon
+        PolygonNFT();
+      else if(chainID == 1) //eth
+        ethereumNFT();
+    }
+    
 
   }, []);
+
+  const ethereumNFT = async () => 
+  {
+
+  }
 
   const PolygonNFT = async () => 
   {
@@ -36,14 +53,48 @@ const MyNFTData = ({ Address, walletType, web3, caver, newKip17addr }) => {
     //https://rpc.ankr.com/eth                   // 이더리움 노드 
 
     //오픈씨 컨트랙트 주소를 통해서 내가 배포한 NFT가 있는지 체크
-    /*
+   
     const openseaContract = "0x2953399124f0cbb46d2cbacd8a89cf0599974963";
-    const tokenContract = await new web3.eth.Contract(erc1155Abi, openseaContract);
+    const tokenContract = await new web3.eth.Contract(openseaAbi, openseaContract);
+    
+    const acc = "0x0ae80159dd77ea78688ecb2a18f96f2d373b1228";
+    const ID = "4933046329366196213817054263083356201750563802660559332468409020327368065025";
+    
 
     const name = await tokenContract.methods.name().call();
-    const symbol = await tokenContract.methods.symbol().call();
+    const symbol = await tokenContract.methods.symbol().call();    
+    const Nonce = tokenContract.methods.getNonce(acc).call();
+    const balanceOf = tokenContract.methods.balanceOf(acc,ID).call();
 
-    */
+    const creator = tokenContract.methods.creator(ID).call();
+
+    console.log("name : " + JSON.stringify(name));
+    console.log("symbol : " + JSON.stringify(symbol));
+
+    console.log("Nonce : " + JSON.stringify(Nonce));
+    console.log("balanceOf : " + JSON.stringify(balanceOf));
+    console.log("creator : " + JSON.stringify(creator));
+
+
+    const MetaURL = "https://deep-index.moralis.io/api/v2/0x0ae80159dd77ea78688ecb2a18f96f2d373b1228/nft/0x2953399124f0cbb46d2cbacd8a89cf0599974963?chain=polygon&format=decimal";
+    axios.get(MetaURL,
+    {
+      headers: {
+        "X-API-KEY": 'uDk5KWWhcDUrUxY5JfKsDp5vVu6ddDRzwS6skkDUgiYHHlQmxBX2MBbn0iKKK67J',
+        "Content-Type": "application/json",
+        "accept": "application/json"
+      }
+    })
+    .then(async function (response) {
+      // 성공한 경우 실행
+      console.log("MetaURL : " + JSON.stringify(response));
+    })
+    .catch(function (error) {
+      // 에러인 경우 실행
+      console.log("error : " + error);
+    })
+
+
 
     //moralis API 에 있는 transction 로그를 이용해 NFT를 가지고 오는 방식
     const url = "https://deep-index.moralis.io/api/v2/" + Address + "/nft?chain=polygon&format=decimal";
@@ -58,10 +109,10 @@ const MyNFTData = ({ Address, walletType, web3, caver, newKip17addr }) => {
     .then(async function (response) {
       // 성공한 경우 실행
       
-      const resultData = JSON.stringify(response['data']['result']);
-
+      const resultData = JSON.stringify(response['data']['result']);      
       for (var i = 0; i < response.data.result.length; i++) 
       {
+        
         var user = response.data.result[i];
         //console.log(user);
 
@@ -75,6 +126,7 @@ const MyNFTData = ({ Address, walletType, web3, caver, newKip17addr }) => {
         const JsonURL = "";
         const FireBaseDB = false;
 
+        
         const URL = user.token_uri.substring(0, 7);
         if (URL == "ipfs://") 
         {          
@@ -94,16 +146,14 @@ const MyNFTData = ({ Address, walletType, web3, caver, newKip17addr }) => {
         }
         else
         {
-          console.log('URI : ' + tokenURI);
           const GetJson = await fetch(tokenURI);
           const jsonFile = await GetJson.json();
 
           JsonName = jsonFile.name;      
           JsonDescription = jsonFile.description;
           JsonURL = jsonFile.image; 
-
-          console.log("Name : "+ JsonName);
         }
+        
 
         setNftlist((prevState) => {
           return [...prevState, { name, symbol, tokenId, JsonURL, JsonName, JsonDescription, FireBaseDB }];
@@ -111,8 +161,8 @@ const MyNFTData = ({ Address, walletType, web3, caver, newKip17addr }) => {
   
         setShowlist((prevState) => {
           return [...prevState, { name, symbol, tokenId, JsonURL, JsonName, JsonDescription, FireBaseDB }];
-        }); 
-      } 
+        });        
+      }
     })
     .catch(function (error) {
       // 에러인 경우 실행
@@ -277,7 +327,7 @@ const MyNFTData = ({ Address, walletType, web3, caver, newKip17addr }) => {
                   alt={token.id}
                 />
               </div>
-              <ul className="list-group list-group-flush">
+              <ul className="list-group list-group-flush" >
                 <table>
                   <li className="list-group-item"><tr><th scope="row" width="50px" text-align="center">이름</th>
                     <td>{token.JsonName}</td></tr></li>
