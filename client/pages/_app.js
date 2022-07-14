@@ -3,6 +3,8 @@ import '../styles/bootstrap.min.css';
 
 import MainTitle from "./MainTitle";
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image'
+
 import Caver from "caver-js";
 import Web3 from "web3";
 
@@ -15,6 +17,9 @@ function MyApp({ Component, pageProps }) {
   const [walletType, setWalletType] = useState("");
   const [isLogin, setIsLogin] = useState(false);
   const [ShowAddress, SetShowAddress] = useState("Login");
+
+  const [CoinAmount, SetCoinAmount] = useState(0);
+  const [CoinIcon, SetCoinIcon] = useState("/images/ethereum_icon.png");
 
   useEffect(() => {
     if (typeof window.ethereum !== "undefined") {
@@ -48,10 +53,19 @@ function MyApp({ Component, pageProps }) {
     const version = await window.klaytn.networkVersion;
     const selectedId = await window.klaytn.selectedAddress;
 
-    if (selectedId != 'undefined') {
+    if (selectedId != 'undefined') 
+    {
       console.log("ID : " + selectedId);
       SetAddress(selectedId);
-      window.sessionStorage.setItem('ID', selectedId);
+
+      SetCoinIcon("/images/klaytn-logo.png");
+      window.sessionStorage.setItem('ID', selectedId);     
+
+      const Coin = await caver.klay.getBalance(selectedId);
+      const balance = caver.utils.convertFromPeb(caver.utils.hexToNumberString(Coin));
+      SetCoinAmount(balance);
+      
+
       setWalletType("klay");
 
       const firstText = selectedId.substring(0, 8);
@@ -72,14 +86,18 @@ function MyApp({ Component, pageProps }) {
           window.sessionStorage.removeItem('ID');
           const selectedId = await ethereum.request({ method: 'eth_requestAccounts' });
           const chainId = await web3.eth.getChainId();
+          const Coin = await web3.eth.getBalance(String(selectedId));
+          //const balance = await web3.toDecimal(Coin);
+          SetCoinAmount(Coin);
 
           window.sessionStorage.setItem('ID', selectedId);
           console.log("MetaMask Account : " + selectedId);
           console.log("MetaMask chainId : " + chainId);
+          console.log("MetaMask Coin : " + Coin);
           console.log(typeof selectedId);
 
           SetAddress(selectedId);
-          setWalletType("eth");
+          
 
           const ID = JSON.stringify(selectedId);
           ID = ID.substr(2);
@@ -89,6 +107,17 @@ function MyApp({ Component, pageProps }) {
           const LastText = ID.slice(-6);
           const AllId = firstText + "......." + LastText;
           SetShowAddress(AllId);
+
+          if(chainId == 137)
+          {
+            setWalletType("poly");
+            SetCoinIcon("/images/polygon_icon.png");
+          }
+          else if(chainId <= 4)
+          {
+            setWalletType("eth");
+            SetCoinIcon("/images/ethereum_icon.png");
+          }
 
           //폴리곤 체인으로 변경하는 코드 
           /*
@@ -153,6 +182,8 @@ function MyApp({ Component, pageProps }) {
         SetAddress={SetAddress}
         ShowAddress={ShowAddress}
         SetShowAddress={SetShowAddress}
+        CoinAmount={CoinAmount}
+        CoinIcon={CoinIcon}
       />
       <Component
         Address={Address}
@@ -162,6 +193,10 @@ function MyApp({ Component, pageProps }) {
         web3={web3}
         caver={caver}
         newKip17addr={newKip17addr}
+        onClickKaikas={onClickKaikas}
+        onMetaMask={onMetaMask}        
+        CoinAmount={CoinAmount}
+        CoinIcon={CoinIcon}
       />
     </>
   );

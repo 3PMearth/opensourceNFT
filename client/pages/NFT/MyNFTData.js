@@ -9,7 +9,7 @@ import FireBaseInit from '../../components/FireBaseInit';
 import Caver from "caver-js";
 import axios from "axios";
 
-const MyNFTData = ({ Address, walletType, web3, caver, newKip17addr }) => {
+const MyNFTData = ({ Address, walletType, web3, caver, newKip17addr,isLogin }) => {
   const [nftlist, setNftlist] = useState([]);
 
   const [GameNFTlist, setGameNFTlist] = useState([]);
@@ -24,16 +24,21 @@ const MyNFTData = ({ Address, walletType, web3, caver, newKip17addr }) => {
   });
 
   useEffect( async () => {
+    if(!isLogin)
+    {
+
+    }
+
     if(walletType == "klay")
     {
-      KlaytnNFT();
+      KlaytnNFT();  
     }
     else
     {
       const chainId = await web3.eth.getChainId();
       if(chainId == 137)  // polygon
         PolygonNFT();
-      else if(chainID == 1) //eth
+      else if(chainId == 1) //eth 
         ethereumNFT();
     }
     
@@ -42,7 +47,83 @@ const MyNFTData = ({ Address, walletType, web3, caver, newKip17addr }) => {
 
   const ethereumNFT = async () => 
   {
+    const url = "https://deep-index.moralis.io/api/v2/" + Address + "/nft?chain=eth&format=decimal";
+    axios.get(url,
+    {
+      headers: {
+        "X-API-KEY": 'uDk5KWWhcDUrUxY5JfKsDp5vVu6ddDRzwS6skkDUgiYHHlQmxBX2MBbn0iKKK67J',
+        "Content-Type": "application/json",
+        "accept": "application/json"
+      }
+    })
+    .then(async function (response) {
+      // 성공한 경우 실행
+      //console.log("response : " + JSON.stringify(response['data']['result']['0']['metadata']));
+      const resultData = JSON.stringify(response['data']['result']);
+      for (var i = 0; i < response.data.result.length; i++) 
+      {        
+        var user = response.data.result[i];
 
+        const name = user.name;
+        const symbol = user.symbol;
+        const tokenId =  user.token_id;
+        const tokenURI = user.token_uri;
+
+        const JsonName = "";
+        const JsonDescription = "";
+        const JsonURL = "";
+        const FireBaseDB = false;
+        
+        const URL = user.token_uri.substring(0, 7);
+        if (URL == "ipfs://") 
+        {          
+          //FireBaseNFTData(name, symbol, tokenId, JsonURL, JsonName, JsonDescription);
+          const NFTItem = FireBaseInit.collection("NFT_ITEM");
+  
+          NFTItem.doc(JsonName).get().then((doc) => {
+            if (doc.exists) {
+              console.log("파이어베이스 이제 들어옴");
+  
+              FireBaseDB = true;
+              setGameNFTlist((prevState) => {
+                return [...prevState, { name, symbol, tokenId, JsonURL, JsonName, JsonDescription, FireBaseDB }];
+              });
+            }
+          });
+        }
+        else
+        {
+          const GetJson = await fetch(tokenURI);
+          const jsonFile = await GetJson.json();
+
+          JsonName = jsonFile.name;      
+          JsonDescription = jsonFile.description;
+          if(!JsonDescription)
+          {
+            JsonDescription = jsonFile.bio;
+          }
+
+          JsonURL = jsonFile.image; 
+          if(!JsonURL)
+          {
+            JsonURL = jsonFile.image_url;
+          }
+          
+        }        
+
+        setNftlist((prevState) => {
+          return [...prevState, { name, symbol, tokenId, JsonURL, JsonName, JsonDescription, FireBaseDB }];
+        });
+  
+        setShowlist((prevState) => {
+          return [...prevState, { name, symbol, tokenId, JsonURL, JsonName, JsonDescription, FireBaseDB }];
+        });        
+      }
+    })
+    .catch(function (error) {
+      // 에러인 경우 실행
+      console.log("error : " + error);
+    })
   }
 
   const PolygonNFT = async () => 
@@ -202,14 +283,6 @@ const MyNFTData = ({ Address, walletType, web3, caver, newKip17addr }) => {
       //caFilter: '0xbbe63781168c9e67e7a8b112425aa84c479f39aa',
     }
     const result = await Caver.kas.tokenHistory.getTransferHistoryByAccount(Address, query);
-    console.log("Send: " + JSON.stringify(result));
-
-    /*
-    query = { size: 5 };
-    result = await Caver.kas.tokenHistory.getNFTOwnershipHistory("0x9faccd9f9661dddec3971c1ee146516127c34fc1", '0x3bb78636');
-    //result = await Caver.kas.tokenHistory.getNFTList(newKip17addr, query);   
-    console.log("Result : " + JSON.stringify(result));
-    */
 
     let Contract = [];
     for (let i = 0; i <= query.size; i++) {
@@ -236,8 +309,6 @@ const MyNFTData = ({ Address, walletType, web3, caver, newKip17addr }) => {
     for (let con of Contract) {
       tokenContract = await new caver.klay.Contract(kip17Abi, con[0]);
 
-      console.log("token : " + con);
-
       const name = await tokenContract.methods.name().call();
       const symbol = await tokenContract.methods.symbol().call();
       const tokenId = parseInt(con[1],16);
@@ -260,16 +331,12 @@ const MyNFTData = ({ Address, walletType, web3, caver, newKip17addr }) => {
         const GetJson = await fetch(MetaDataJson);
 
         const jsonFile = await GetJson.json();
-        console.log("jsonFile : " + JSON.stringify(jsonFile));
-
         JsonName = jsonFile.name;
 
         JsonDescription = jsonFile.description;
         const Image = jsonFile.image;
         //JsonURL = Image.replace("ipfs://", "https://gateway.ipfs.io/ipfs/");
         JsonURL = Image.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/");
-        console.log("JsonURL : " + JsonURL);
-
         //FireBaseNFTData(name, symbol, tokenId, JsonURL, JsonName, JsonDescription);
         const NFTItem = FireBaseInit.collection("NFT_ITEM");
 
@@ -287,7 +354,6 @@ const MyNFTData = ({ Address, walletType, web3, caver, newKip17addr }) => {
       else {
         const GetJson = await fetch(tokenURI);
         const jsonFile = await GetJson.json();
-        console.log("jsonFile : " + JSON.stringify(jsonFile));
 
         JsonName = jsonFile.name;      
         JsonDescription = jsonFile.description;

@@ -4,47 +4,20 @@ import Title from '../styles/Title.module.css';
 
 //import Login from './api/Login';
 import Link from 'next/link';
+import Image from 'next/image'
+
 import LoginModal from './api/LoginModal';
 
 //import * as AlertText from "./api/AlertText.js";
 import AlertModal from "./api/AlertModal";
 
-const MainTitle = ({Address, SetAddress,ShowAddress,SetShowAddress, setWalletType,isLogin,setIsLogin, web3, caver, onClickKaikas, onMetaMask }) => {
+//import TestImg from "../public/Image/soonsoon.png"
+//import TestImg from "../public/Image/soonsoon.png"
+
+const MainTitle = ({Address, SetAddress,ShowAddress,SetShowAddress, setWalletType,isLogin,setIsLogin, web3, caver, onClickKaikas, onMetaMask,CoinAmount,CoinIcon }) => {
     const Name = "3PM";
     const [LoginOn, setLoginOn] = useState(false);
     const [AlertOn, setAlertOn] = useState(false);
-
-    
-
-    /*
-    const CheckUnlocked = async () => 
-    {
-        
-        const isUnlock = true;
-        const isID = "";
-
-        if (typeof window !== 'undefined' && window.klaytn)
-        {
-            isID = window.sessionStorage.getItem('ID');
-            // 지갑이 연결되어있다면 true, 아니라면 false를 리턴합니다.
-            isUnlock = await window.klaytn._kaikas.isUnlocked();  
-            console.log("klaytn isID : " + isID);
-            console.log("klaytn isUnlock : " + isUnlock);
-        }
-
-        if (isID !== null && isUnlock === true) 
-        {
-            const firstText = isID.substring(0,8);
-            const LastText = isID.slice(-6);
-            const AllId = firstText + "......." + LastText;
-
-            SetAddress(AllId);
-        } 
-        
-    }
-    CheckUnlocked();
-    */   
-
     const CheckUnlocked = () => 
     {
         if(window.klaytn || window.ethereum)
@@ -86,6 +59,23 @@ const MainTitle = ({Address, SetAddress,ShowAddress,SetShowAddress, setWalletTyp
                             <div className={Title.MainMenu}><Link href="/NFT/Minting">NFT Minting</Link></div>
                         </Nav>
                     </Navbar.Collapse>
+                    {isLogin && (
+                    <Nav className="mr-auto">
+                    <div>
+                    <Image
+                        alt="Icon"
+                        width="25%"
+                        height="26%"
+                        src={CoinIcon}
+                        />
+                    </div>&nbsp;
+                    <div style={{textalign:"center"}}>{CoinAmount}</div>
+
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    </Nav>
+                    )
+                    }
+        
                     <Nav className="mr-auto">
                         <Button variant="primary" onClick={()=> { CheckUnlocked(); }} >{ShowAddress}</Button>
                     </Nav>

@@ -3,7 +3,8 @@ import Image from 'next/image'
 import styles from '../styles/Home.module.css';
 
 import MainTitle from "./MainTitle";
-import TestImg from "../public/Image/soonsoon.png"
+import TestImg from "../public/images/soonsoon.png"
+import KlaytnImg from "../public/images/klaytn-logo.png"
 
 
 export default function Home() {
@@ -31,6 +32,7 @@ export default function Home() {
       
       <div className="HomeImageContainer">
         <Image src={TestImg}/>
+        <Image src={KlaytnImg}/>
       </div>
     </div>
   )
