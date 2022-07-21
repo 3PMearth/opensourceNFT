@@ -24,10 +24,7 @@ function MyApp({ Component, pageProps }) {
   useEffect(() => {
     if (typeof window.ethereum !== "undefined") {
       try {
-        //const web = new Web3(window.ethereum);
         const web = new Web3(window.ethereum);
-
-
         setWeb3(web);
         console.log("new Web3!");
       } catch (err) {
@@ -87,8 +84,8 @@ function MyApp({ Component, pageProps }) {
           const selectedId = await ethereum.request({ method: 'eth_requestAccounts' });
           const chainId = await web3.eth.getChainId();
           const Coin = await web3.eth.getBalance(String(selectedId));
-          //const balance = await web3.toDecimal(Coin);
-          SetCoinAmount(Coin);
+          const balance = await web3.utils.fromWei(Coin, 'ether');
+          SetCoinAmount(balance);
 
           window.sessionStorage.setItem('ID', selectedId);
           console.log("MetaMask Account : " + selectedId);
@@ -108,12 +105,12 @@ function MyApp({ Component, pageProps }) {
           const AllId = firstText + "......." + LastText;
           SetShowAddress(AllId);
 
-          if(chainId == 137)
+          if(chainId == 137 || chainId == 80001)
           {
             setWalletType("poly");
             SetCoinIcon("/images/polygon_icon.png");
           }
-          else if(chainId <= 4)
+          else
           {
             setWalletType("eth");
             SetCoinIcon("/images/ethereum_icon.png");

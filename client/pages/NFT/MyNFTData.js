@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import MainTitle from "../MainTitle";
 import kip17Abi from "../../components/kip17Abi";
 import erc721Abi from "../../components/erc721Abi";
 import erc1155Abi from "../../components/erc1155Abi";
@@ -57,8 +56,6 @@ const MyNFTData = ({ Address, walletType, web3, caver, newKip17addr,isLogin }) =
       }
     })
     .then(async function (response) {
-      // 성공한 경우 실행
-      //console.log("response : " + JSON.stringify(response['data']['result']['0']['metadata']));
       const resultData = JSON.stringify(response['data']['result']);
       for (var i = 0; i < response.data.result.length; i++) 
       {        
@@ -139,7 +136,7 @@ const MyNFTData = ({ Address, walletType, web3, caver, newKip17addr,isLogin }) =
     const tokenContract = await new web3.eth.Contract(openseaAbi, openseaContract);
     
     const acc = "0x0ae80159dd77ea78688ecb2a18f96f2d373b1228";
-    const ID = "4933046329366196213817054263083356201750563802660559332468409020327368065025";
+    const ID = "4933046329366196213817054263083356201750563802660559332468409021426879692801";
     
 
     const name = await tokenContract.methods.name().call();
@@ -404,12 +401,6 @@ const MyNFTData = ({ Address, walletType, web3, caver, newKip17addr,isLogin }) =
                   <li className="list-group-item"><tr><th scope="row" width="50px" text-align="center">설명</th>
                     <td height="80px">{token.JsonDescription}</td></tr></li>
                 </table>
- 
-                {/*
-                <div><li className="list-group-item">ID : {token.tokenId} </li></div>
-                <div><li className="list-group-item">심볼 : {token.symbol}</li></div>
-                <div><li className="list-group-item">설명 : 안녕하세요 설명이 길어집니다{token.JsonDescription}</li></div>
-                 */}
               </ul>
             </div>
           </form>

@@ -1,18 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "react-bootstrap";
-import MainTitle from "../MainTitle";
-import Image from 'next/image';
 
 import Mystyles from "../../styles/mynft.module.css";
 
-import FireBaseInit from '../../components/FireBaseInit';
 import pinataSDK from '@pinata/sdk';
 //import DataFile from '../api/DataFile';
 import FormData from 'form-data';
 import Axios from 'axios';
-import fs from 'fs'
 
-import { create } from "ipfs-http-client";
 import kip17Abi from "../../components/kip17Abi";
 
 const PinataApiKey = "4f31d7dbb5810f6e37be";
@@ -53,14 +48,6 @@ export default function CreateNFT({Address, walletType,isLogin, web3, caver, new
     }
   };
 
-  /*
-  const fetchAPI = () => {
-    setApiResult("Loading...");
-    fetch("/api/image/")
-      .then((r) => r.json())
-      .then(setApiResult);
-  };
-  */
 
   const onChange = async (e) => {
     const file = e.target.files[0];
@@ -70,40 +57,6 @@ export default function CreateNFT({Address, walletType,isLogin, web3, caver, new
     setShowImage(createURL);
     SetFileName(file);
     
-
-    /*
-    console.log("file : " + JSON.stringify(file) + "  URL : " + createURL);
-    const DataFile = require('../api/image/DataFile');        
-    const readableStreamForFile = DataFile.CreateReadStreamData(createURL);
-
-    
-    setInputImage(createURL);
-    console.log("ReadData :  " + readableStreamForFile);
-    */
-    /*
-    //const readableStreamForFile = fs.createReadStream(createURL);
-    console.log("Stream : " + readableStreamForFile);
-    pinata.pinFileToIPFS(readableStreamForFile, options).then((result) => {
-      console.log("Result : " + result);
-      const URL = "ipfs://" + result.data.IpfsHash;
-      setInputImage(URL);
-
-    }).catch((err) => {
-      console.log(err);
-    });
-    */
-
-    /*
-    const client = create("https://ipfs.infura.io:5001/api/v0");
-    try {
-      const added = await client.add(file);
-      const url = `https://ipfs.infura.io/ipfs/${added.path}`;
-      updateFileUrl(url);
-      console.log("image : " + URL.createObjectURL(file));
-    } catch (error) {
-      console.log("Error uploading file: ", error);
-    }
-    */
   };
 
 
@@ -182,14 +135,6 @@ export default function CreateNFT({Address, walletType,isLogin, web3, caver, new
       });
   
       tokenContract.options.address = newKip17addr;
-      
-      /*
-      newTokenId = tokenContract.methods.mintNFT(Address, "ipfs://" + result.IpfsHash).send(
-        {
-          from: Address,
-          gas: '850000'
-        });
-        */
 
     }).catch((err) => {
       //handle error here
@@ -233,33 +178,3 @@ export default function CreateNFT({Address, walletType,isLogin, web3, caver, new
   );
 
 }
-
-//{ DataInput ? <Button size="big" content="Create NFT" onClick={createNewNFT}>Minting</Button>  :  setDataInput(false)}
-/*
-<div className={styles.selectFile}>
-<label htmlFor="fileInput">
-<img htmlFor="fileInput" src={image} alt="preview image" className={styles.selectedImage} />
-</label>
-<input type="file" name="file" onChange={onChange} id="fileInput" />
-</div>
-<div>{fileUrl ? <div>IPFS Link: {fileUrl}</div> : ""}</div>
-
-
-
-<Button size="big" content="Create NFT" onClick={createNewNFT}>Minting</Button>
-
-
-
-          <div class="form-group row">
-            <label for="exampleInputPassword1" class="col-sm-2 col-form-label">Password</label>
-            <div class="col-sm-10">
-            <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password" />
-            </div>
-          </div>
-*/
-//NFT 생성하는 코드
-/*
-createNewNFT는 화면에서 이미지를 올린 후 createNFT 버튼을 클릭했을 때 실행되는 함수로,
-앞서 지갑연결과 같이 walletType에 따라 이더리움이나 클레이튼 컨트랙트로 접근하여 mintNFT 함수를 실행시킨다. 파라메터로 연결된 지갑 주소와 업로드한 파일의 IPFS 주소 값을 넘겨준다.
-이렇게 하면 나만의 NFT 생성 완료..!
-*/

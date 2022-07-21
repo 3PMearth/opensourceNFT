@@ -19,8 +19,6 @@ const LoginModal = ({ show, onHide, Address, SetAddress,SetShowAddress, setWalle
       onHide(false);
       console.log("MetaMask Login :  "+ isLogin);
     }
-    
-    //tokenSave(account);
   };
   const kaikasLoginButton = (e) => {  
     if (isLogin) {
@@ -39,7 +37,6 @@ const LoginModal = ({ show, onHide, Address, SetAddress,SetShowAddress, setWalle
       onHide(false);
       console.log("KaiKas Login : " + isLogin);
     }
-    //tokenSave(account);
   };
 
   return (
@@ -74,11 +71,6 @@ const LoginModal = ({ show, onHide, Address, SetAddress,SetShowAddress, setWalle
                 onClick={() =>{kaikasLoginButton();  }}>KaiKas 로그인</Button>
         </Modal.Body>
         <br/><br/><br/>
-        {
-        //<Modal.Footer>
-        //  <Button onClick={onHide}>Close</Button>
-        //</Modal.Footer>
-        }
 
       </Modal>
       
